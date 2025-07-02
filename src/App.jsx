@@ -7,25 +7,29 @@ export default function App() {
   const handleSearch = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('/.netlify/functions/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
-    });
+    try {
+      const response = await fetch('/.netlify/functions/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAnswer(data.answer); // <--- Zorg dat je function 'answer' teruggeeft
+    } catch (error) {
+      console.error(error);
       setAnswer('Er is iets misgegaan bij het ophalen van het antwoord.');
-      return;
     }
-
-    const data = await response.json();
-    setAnswer(data.result);
   };
 
   return (
     <div
       style={{
-        backgroundColor: '#0b1f4b', // Donkerblauw
+        backgroundColor: '#0b1f4b',
         color: '#ffffff',
         minHeight: '100vh',
         display: 'flex',
@@ -61,32 +65,3 @@ export default function App() {
           style={{
             padding: '1rem 2rem',
             backgroundColor: '#2563eb',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '0 8px 8px 0',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-          }}
-        >
-          Zoek
-        </button>
-      </form>
-
-      {answer && (
-        <div
-          style={{
-            marginTop: '2rem',
-            backgroundColor: '#1e3a8a',
-            padding: '2rem',
-            borderRadius: '8px',
-            width: '60%',
-            maxWidth: '600px',
-            fontSize: '1.2rem',
-          }}
-        >
-          {answer}
-        </div>
-      )}
-    </div>
-  );
-}
